@@ -3,7 +3,7 @@
 import argparse
 import logging
 import os
-import grid_broker_worker
+from libs import grid_broker_worker
 
 
 if __name__ == '__main__':

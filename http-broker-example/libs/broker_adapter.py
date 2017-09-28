@@ -37,6 +37,15 @@ class BrokerAdapter(threading.Thread):
         self.__orders = dict()
 
     @property
+    def orders(self) -> list:
+        '''
+        get stored order IDs
+        :return: list of IDs
+        '''
+        with self.__lock:
+            return copy.deepcopy(list(self.__orders.keys()))
+
+    @property
     def state(self, order_id: str) -> dict:
         '''
         stored order state
