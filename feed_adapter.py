@@ -7,42 +7,60 @@ import time
 import urllib.parse
 from socket import error as SocketError
 
+
 class FeedAdapter(threading.Thread):
+    '''
+    EXANTE API feed adapter
+    '''
 
     __headers = {'accept': 'application/x-json-stream'}
 
-    def __init__(self, instrument, base_url, application, token):
+    def __init__(self, instrument: str, base_url: str,
+                 auth: requests.auth.HTTPBasicAuth):
+        '''
+        :param instrument: instrument ID
+        :param base_url: base API url
+        :param auth: basic auth object
+        '''
         super(FeedAdapter, self).__init__()
         self.__lock = threading.Lock()
         self.daemon = True
 
         self.__url = base_url
 
-        self.__auth = requests.auth.HTTPBasicAuth(application, token)
+        self.__auth = auth
         self.__logger = logging.getLogger('http-broker')
-        self.__should_run = True
-        self.__stream_url = '{}/md/1.0/feed/{}'.format(self.__url,
-                                                       urllib.parse.quote_plus(instrument))
+        self.__stream_url = '{}/md/1.0/feed/{}'.format(
+            self.__url, urllib.parse.quote_plus(instrument))
 
         self.__quotes = dict()
 
     @property
-    def quotes(self):
+    def quotes(self) -> dict:
+        '''
+        get last received quotes
+        :return: quotes as is in API
+        '''
         with self.__lock:
             return copy.deepcopy(self.__quotes)
 
-    def __get_stream(self):
-        response = requests.get(self.__stream_url, auth=self.__auth,
-                                stream=True, timeout=60, headers=self.__headers)
+    def __get_stream(self) -> iter:
+        '''
+        get raw quotes stream
+        :return: response line iterator
+        '''
+        response = requests.get(
+            self.__stream_url, auth=self.__auth, stream=True, timeout=60,
+            headers=self.__headers)
         return response.iter_lines(chunk_size=1)
 
-    def run(self):
-        while self.__should_run:
+    def run(self) -> None:
+        '''
+        main cycle
+        '''
+        while True:
             try:
                 for item in self.__get_stream():
-                    # exit on no actions
-                    if not self.__should_run:
-                        break
                     # work block
                     data = json.loads(item.decode('utf8'))
                     self.__logger.debug('Received data {}'.format(data))
@@ -60,7 +78,3 @@ class FeedAdapter(threading.Thread):
             except SocketError:
                 self.__logger.warning('Socket error', exc_info=True)
             time.sleep(60)
-
-    def stop(self):
-        with self.__lock:
-            self.__should_run = False
