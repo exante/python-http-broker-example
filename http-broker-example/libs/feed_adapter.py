@@ -68,7 +68,7 @@ class FeedAdapter(threading.Thread):
             headers=self.__headers)
         return response.iter_lines(chunk_size=1)
 
-    def run(self) -> None:
+    def run(self) -> iter:
         '''
         main cycle
         '''
