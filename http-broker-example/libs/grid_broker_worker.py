@@ -1,3 +1,17 @@
+#
+# Copyright (c) 2017 EXANTE
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+
 import decimal
 import logging
 import requests
@@ -105,11 +119,16 @@ class GridBrokerWorker(object):
             # main logic
             if abs(old_mid - mid) < grid:
                 continue
-            side = 'sell' if mid - old_mid > 0.0 else 'buy'
+            if mid - old_mid > 0:
+                side = 'sell'
+                price = str(quote['ask'])
+            else:
+                side = 'buy'
+                price = str(quote['bid'])
             self.__logger.debug('Grid triggered at {} {} (previous {})'.format(
                 mid, side, old_mid))
             order_id = self.__broker.place_limit(
-                instrument, side, quantity, float(mid))
+                instrument, side, str(quantity), price)
 
             # process order
             if order_id is None:

@@ -1,4 +1,17 @@
 #!/usr/bin/env python
+#
+# Copyright (c) 2017 EXANTE
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
 
 import argparse
 import logging
@@ -42,8 +55,7 @@ if __name__ == '__main__':
     except KeyError:
         logging.warning('Cannot find token')
         exit(1)
-    # FIXME https?
-    url = 'http://api-{}.exante.eu'.format(args.environment)
+    url = 'https://api-{}.exante.eu'.format(args.environment)
 
     # init
     worker = grid_broker_worker.GridBrokerWorker(args.account, args.interval,
