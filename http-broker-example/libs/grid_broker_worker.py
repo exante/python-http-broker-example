@@ -119,16 +119,11 @@ class GridBrokerWorker(object):
             # main logic
             if abs(old_mid - mid) < grid:
                 continue
-            if mid - old_mid > 0:
-                side = 'sell'
-                price = str(quote['ask'])
-            else:
-                side = 'buy'
-                price = str(quote['bid'])
+            side = 'sell' if mid - old_mid > 0 else 'buy'
             self.__logger.debug('Grid triggered at {} {} (previous {})'.format(
                 mid, side, old_mid))
             order_id = self.__broker.place_limit(
-                instrument, side, str(quantity), price)
+                instrument, side, str(quantity), str(mid))
 
             # process order
             if order_id is None:
